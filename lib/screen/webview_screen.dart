@@ -20,15 +20,18 @@ class WebViewerScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.wifi_off,
-                      size: 100, color: Theme.of(context).colorScheme.error),
-                  const SizedBox(height: 20),
+                  const JulesLogo(size: 120),
+                  const SizedBox(height: 40),
                   const Text('Could not load the page. Check your connection.',
-                      style: TextStyle(fontSize: 18)),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
                     onPressed: controller.retryConnection,
-                    child: const Text('Try Again'),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Try Again'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
                   ),
                 ],
               ),
@@ -44,6 +47,19 @@ class WebViewerScreen extends StatelessWidget {
                 WebViewWidget(controller: controller.webViewController),
                 if (controller.loadingPercentage.value > 0 &&
                     controller.loadingPercentage.value < 100)
+                  LinearProgressIndicator(
+                    value: controller.loadingPercentage.value / 100.0,
+                    color: Theme.of(context).primaryColor,
+                  ),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+centage.value < 100)
                   LinearProgressIndicator(
                     value: controller.loadingPercentage.value / 100.0,
                     color: Theme.of(context).primaryColor,

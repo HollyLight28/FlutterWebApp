@@ -22,15 +22,17 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
 
-flutter_native_splash:
-  color: "#ffffff"
-  image: lib/images/android.png
-  android: true
-  ios: true
-  web: false
-  android_gravity: center
-  ios_content_mode: center
-  fullscreen: true  
+# flutter_native_splash:
+#   color: "#ffffff"
+#   image: lib/images/android.png
+#   android: true
+#   ios: true
+#   web: false
+#   android_gravity: center
+#   ios_content_mode: center
+#   fullscreen: true  
 
 flutter:
   uses-material-design: true
+  assets:
+    - lib/images/

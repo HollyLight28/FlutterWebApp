@@ -6,8 +6,8 @@ class WebViewerController extends GetxController {
   final String url;
   late final WebViewController webViewController;
 
-  Rx loadingPercentage = Rx(0);
-  RxBool hasInternetConnection = RxBool(false);
+  RxInt loadingPercentage = 0.obs;
+  RxBool hasInternetConnection = true.obs;
 
   WebViewerController(this.url);
 
