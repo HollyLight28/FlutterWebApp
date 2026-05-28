@@ -15,7 +15,7 @@ class JulesLogo extends StatelessWidget {
       ),
       child: Center(
         child: Icon(
-          Icons.octopus, // Використовуємо стандартну іконку восьминога як плейсхолдер
+          Icons.psychology, // Використовуємо іконку психології/мозку як плейсхолдер для AI
           size: size * 0.7,
           color: Colors.deepPurple,
         ),
