@@ -20,10 +20,11 @@ class WebViewerController extends GetxController {
   void initializeWebView() {
     webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent("Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36")
       ..setNavigationDelegate(NavigationDelegate(
         // Allow only internal navigation
         onNavigationRequest: (request) async {
-          if (request.url.startsWith(url)) {
+          if (request.url.contains('google.com') || request.url.contains('gstatic.com')) {
             return NavigationDecision.navigate;
           }
           await launchExternalUrl(request.url); // Open external in browser
