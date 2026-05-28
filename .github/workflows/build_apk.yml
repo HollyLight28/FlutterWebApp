@@ -15,13 +15,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21'
           
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'any'
           channel: 'stable'
+          cache: true
           
       - name: Install dependencies
         run: flutter pub get
