@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../controller/webview_controller.dart';
+import 'jules_logo.dart';
 
 class WebViewerScreen extends StatelessWidget {
   final String url;
@@ -47,19 +48,6 @@ class WebViewerScreen extends StatelessWidget {
                 WebViewWidget(controller: controller.webViewController),
                 if (controller.loadingPercentage.value > 0 &&
                     controller.loadingPercentage.value < 100)
-                  LinearProgressIndicator(
-                    value: controller.loadingPercentage.value / 100.0,
-                    color: Theme.of(context).primaryColor,
-                  ),
-              ],
-            ),
-          ),
-        );
-      }),
-    );
-  }
-}
-centage.value < 100)
                   LinearProgressIndicator(
                     value: controller.loadingPercentage.value / 100.0,
                     color: Theme.of(context).primaryColor,
