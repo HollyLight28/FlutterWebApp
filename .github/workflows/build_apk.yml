@@ -30,7 +30,7 @@ jobs:
         working-directory: .
         
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk --release --android-skip-build-dependency-validation
         working-directory: .
         
       - name: Upload APK
