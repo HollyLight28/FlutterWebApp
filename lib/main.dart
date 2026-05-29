@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterwebapp/screen/webview_screen.dart';
 
 // Website to be loaded inside the app
 const websiteUrl = 'https://jules.google.com/u/0/session';
 
 void main() {
-// Ensure Flutter widgets are prepared
+  // Ensure Flutter widgets are prepared
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Set system navigation bar to transparent for edge-to-edge
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.dark,
+  ));
+  
+  // Enable full screen edge-to-edge mode
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   runApp(const MyApp());
 }
@@ -19,9 +29,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter WebView App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.system, // Follow system theme
       debugShowCheckedModeBanner: false,
       home: WebViewerScreen(url: websiteUrl),
     );
