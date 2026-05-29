@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutterwebapp/screen/webview_screen.dart';
+import 'package:julesbox/screen/webview_screen.dart';
 
 // Website to be loaded inside the app
 const websiteUrl = 'https://jules.google.com/u/0/session';
