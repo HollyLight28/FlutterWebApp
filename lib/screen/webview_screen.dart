@@ -58,7 +58,10 @@ class WebViewerScreen extends StatelessWidget {
               child: Stack(
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top,
+                      // ПРИБРАНО BOTTOM PADDING
+                    ),
                     child: ClipRRect(
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(24.0),
