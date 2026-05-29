@@ -5,6 +5,9 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,14 +28,21 @@ jobs:
           
       - name: Install dependencies
         run: flutter pub get
-        working-directory: .
+        
+      - name: Generate Launcher Icons
+        run: flutter pub run flutter_launcher_icons
         
       - name: Build APK
         run: flutter build apk --release --android-skip-build-dependency-validation --no-tree-shake-icons
-        working-directory: .
         
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - name: Create or Update Release
+        uses: ncipollo/release-action@v1
         with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          artifacts: "build/app/outputs/flutter-apk/app-release.apk"
+          tag: "latest"
+          name: "Latest Release"
+          body: "Auto-generated APK build from the latest master branch."
+          allowUpdates: true
+          replacesArtifacts: true
+          makeLatest: true
+          token: ${{ secrets.GITHUB_TOKEN }}
