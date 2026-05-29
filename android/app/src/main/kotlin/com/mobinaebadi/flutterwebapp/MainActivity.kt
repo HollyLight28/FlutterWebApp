@@ -5,16 +5,15 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugins.GeneratedPluginRegistrant
 import android.os.Build
 import android.view.View
-import android.view.WindowInsetsController
+import android.graphics.Color
 
 class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
-        GeneratedPluginRegistrant.registerWith(flutterEngine)
+        super.configureFlutterEngine(flutterEngine)
         
-        // Full transparent system bars on Android
-        if (Build.VERSION.SDK_INT >= Build.VERSION_10) {
-            window.setDecorFitsSystemWindows(false)
-            window.navigationBarColor = 0
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.navigationBarColor = Color.TRANSPARENT
+            window.statusBarColor = Color.TRANSPARENT
         }
     }
 }
