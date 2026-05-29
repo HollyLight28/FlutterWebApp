@@ -47,8 +47,8 @@ class WebViewerController extends GetxController {
           _injectNotificationListener();
         },
         onWebResourceError: (error) {
-          if (error.errorType == WebResourceErrorType.hostLookup ||
-              error.errorType == WebResourceErrorType.connect) {
+          if ((error.isForMainFrame ?? false) && (error.errorType == WebResourceErrorType.hostLookup ||
+              error.errorType == WebResourceErrorType.connect)) {
             hasInternetConnection.value = false;
             loadingPercentage.value = 0;
           }

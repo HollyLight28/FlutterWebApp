@@ -25,7 +25,17 @@ class WebViewerScreen extends StatelessWidget {
         systemNavigationBarDividerColor: Colors.transparent,
         systemNavigationBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
       ),
-      child: Scaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (bool didPop, dynamic result) async {
+          if (didPop) return;
+          if (await controller.canGoBack()) {
+            controller.goBack();
+          } else {
+            SystemNavigator.pop();
+          }
+        },
+        child: Scaffold(
         extendBody: true,
         body: Obx(() {
           if (!controller.hasInternetConnection.value) {
@@ -69,23 +79,12 @@ class WebViewerScreen extends StatelessWidget {
                       child: WebViewWidget(controller: controller.webViewController),
                     ),
                   ),
-                  if (controller.loadingPercentage.value > 0 &&
-                      controller.loadingPercentage.value < 100)
-                    Positioned(
-                      top: MediaQuery.of(context).padding.top,
-                      left: 0,
-                      right: 0,
-                      child: LinearProgressIndicator(
-                        value: controller.loadingPercentage.value / 100.0,
-                        color: Theme.of(context).primaryColor,
-                        minHeight: 3,
-                      ),
-                    ),
                 ],
               ),
             ),
           );
         }),
+      ),
       ),
     );
   }
