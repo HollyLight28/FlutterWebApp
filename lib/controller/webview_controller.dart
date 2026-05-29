@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:file_picker/file_picker.dart';
 import 'notification_service.dart';
 
 class WebViewerController extends GetxController {
@@ -53,8 +55,41 @@ class WebViewerController extends GetxController {
             loadingPercentage.value = 0;
           }
         },
-      ))
-      ..loadRequest(Uri.parse(url));
+      ));
+
+    // Handle file picker for Android
+    if (webViewController.platform is AndroidWebViewController) {
+      AndroidWebViewController.enableDebugging(true);
+      (webViewController.platform as AndroidWebViewController)
+          .setOnShowFileSelector(_androidFilePicker);
+    }
+
+    webViewController.loadRequest(Uri.parse(url));
+  }
+
+  Future<List<String>> _androidFilePicker(FileSelectorParams params) async {
+    try {
+      if (params.acceptTypes.any((type) => type == 'image/*')) {
+        final result = await FilePicker.pickFiles(
+          type: FileType.image,
+          allowMultiple: params.mode == FileSelectorMode.openMultiple,
+        );
+        if (result != null && result.files.isNotEmpty) {
+          return result.files.map((e) => Uri.file(e.path!).toString()).toList();
+        }
+      } else {
+        final result = await FilePicker.pickFiles(
+          type: FileType.any,
+          allowMultiple: params.mode == FileSelectorMode.openMultiple,
+        );
+        if (result != null && result.files.isNotEmpty) {
+          return result.files.map((e) => Uri.file(e.path!).toString()).toList();
+        }
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Unable to pick file');
+    }
+    return [];
   }
 
   void _injectNotificationListener() {

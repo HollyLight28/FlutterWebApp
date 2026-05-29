@@ -14,7 +14,7 @@ class WebViewerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -27,6 +27,7 @@ class WebViewerScreen extends StatelessWidget {
       ),
       child: Scaffold(
         extendBody: true,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Obx(() {
           if (!controller.hasInternetConnection.value) {
             return Center(
@@ -35,8 +36,14 @@ class WebViewerScreen extends StatelessWidget {
                 children: [
                   const JulesLogo(size: 120),
                   const SizedBox(height: 40),
-                  const Text('Could not load the page. Check your connection.',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  Text('Could not load the page. Check your connection.',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: controller.retryConnection,
@@ -44,6 +51,8 @@ class WebViewerScreen extends StatelessWidget {
                     label: const Text('Try Again'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
                 ],
@@ -60,7 +69,6 @@ class WebViewerScreen extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.only(
                       top: MediaQuery.of(context).padding.top,
-                      // ПРИБРАНО BOTTOM PADDING
                     ),
                     child: ClipRRect(
                       borderRadius: const BorderRadius.vertical(
