@@ -33,18 +33,19 @@ class WebViewerController extends GetxController {
         channelDescription: 'Keep Jules AI active in the background',
         channelImportance: NotificationChannelImportance.LOW,
         priority: NotificationPriority.LOW,
-        iconData: NotificationIconData(
-          resType: ResourceType.mipmap,
-          resPrefix: ResourcePrefix.ic,
-          name: 'launcher_icon',
+        notificationIcon: NotificationIcon(
+          metaData: const NotificationIconData(
+            resType: ResourceType.mipmap,
+            resPrefix: ResourcePrefix.ic,
+            name: 'launcher_icon',
+          ),
         ),
       ),
       iosNotificationOptions: const IOSNotificationOptions(
         showNotification: true,
         playSound: false,
       ),
-      foregroundTaskOptions: ForegroundTaskOptions(
-        interval: 5000,
+      foregroundTaskOptions: const ForegroundTaskOptions(
         isOnceEvent: false,
         autoRunOnBoot: false,
         allowWakeLock: true,
@@ -120,7 +121,7 @@ class WebViewerController extends GetxController {
   Future<List<String>> _androidFilePicker(FileSelectorParams params) async {
     try {
       if (params.acceptTypes.any((type) => type == 'image/*')) {
-        final result = await FilePicker.pickFiles(
+        final result = await FilePicker.platform.pickFiles(
           type: FileType.image,
           allowMultiple: params.mode == FileSelectorMode.openMultiple,
         );
@@ -128,7 +129,7 @@ class WebViewerController extends GetxController {
           return result.files.map((e) => Uri.file(e.path!).toString()).toList();
         }
       } else {
-        final result = await FilePicker.pickFiles(
+        final result = await FilePicker.platform.pickFiles(
           type: FileType.any,
           allowMultiple: params.mode == FileSelectorMode.openMultiple,
         );
