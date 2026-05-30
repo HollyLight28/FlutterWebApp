@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:julesbox/screen/webview_screen.dart';
 
 // Website to be loaded inside the app
@@ -8,6 +9,9 @@ const websiteUrl = 'https://jules.google.com/u/0/session';
 void main() {
   // Ensure Flutter widgets are prepared
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize foreground task
+  FlutterForegroundTask.initCommunicationPort();
 
   // Enable full screen edge-to-edge mode
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
