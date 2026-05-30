@@ -3,6 +3,9 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'dart:convert';
+import 'dart:io';
 import 'notification_service.dart';
 
 class WebViewerController extends GetxController {
@@ -18,7 +21,45 @@ class WebViewerController extends GetxController {
   void onInit() {
     initializeWebView();
     NotificationService.init();
+    _initForegroundTask();
     super.onInit();
+  }
+
+  Future<void> _initForegroundTask() async {
+    FlutterForegroundTask.init(
+      androidNotificationOptions: AndroidNotificationOptions(
+        channelId: 'jules_foreground',
+        channelName: 'Jules Active Session',
+        channelDescription: 'Keep Jules AI active in the background',
+        channelImportance: NotificationChannelImportance.LOW,
+        priority: NotificationPriority.LOW,
+        iconData: const NotificationIconData(
+          resType: ResourceType.mipmap,
+          resPrefix: ResourcePrefix.ic,
+          name: 'launcher_icon',
+        ),
+      ),
+      iosNotificationOptions: const IOSNotificationOptions(
+        showNotification: true,
+        playSound: false,
+      ),
+      foregroundTaskOptions: const ForegroundTaskOptions(
+        interval: 5000,
+        isOnceEvent: false,
+        autoRunOnBoot: false,
+        allowWakeLock: true,
+        allowWifiLock: true,
+      ),
+    );
+
+    if (await FlutterForegroundTask.isRunningService) {
+       // already running
+    } else {
+       await FlutterForegroundTask.startService(
+         notificationTitle: 'Jules AI is active',
+         notificationText: 'Tap to return to the app',
+       );
+    }
   }
 
   void initializeWebView() {
@@ -28,11 +69,20 @@ class WebViewerController extends GetxController {
       ..addJavaScriptChannel(
         'NotificationChannel',
         onMessageReceived: (JavaScriptMessage message) {
-          NotificationService.showNotification(
-            id: DateTime.now().millisecond,
-            title: 'Jules AI',
-            body: message.message,
-          );
+          try {
+            final data = jsonDecode(message.message);
+            NotificationService.showNotification(
+              id: DateTime.now().millisecond % 100000,
+              title: data['title'] ?? 'Jules AI',
+              body: data['body'] ?? '',
+            );
+          } catch (e) {
+            NotificationService.showNotification(
+              id: DateTime.now().millisecond % 100000,
+              title: 'Jules AI',
+              body: message.message,
+            );
+          }
         },
       )
       ..setNavigationDelegate(NavigationDelegate(
@@ -98,26 +148,56 @@ class WebViewerController extends GetxController {
         if (window.NotificationInterceptorsSet) return;
         window.NotificationInterceptorsSet = true;
 
+        // Helper to send message to Flutter
+        function sendToFlutter(title, options) {
+          if (window.NotificationChannel) {
+            const body = options && options.body ? options.body : "";
+            window.NotificationChannel.postMessage(JSON.stringify({
+              title: title,
+              body: body
+            }));
+          }
+        }
+
+        // Mock Notification API
         const oldNotify = window.Notification;
         window.Notification = function(title, options) {
-          if (window.NotificationChannel) {
-            window.NotificationChannel.postMessage(title + (options && options.body ? ": " + options.body : ""));
-          }
-          return { close: () => {} };
+          sendToFlutter(title, options);
+          return {
+            close: () => {},
+            onclick: null,
+            onshow: null,
+            onerror: null,
+            onclose: null
+          };
         };
         window.Notification.permission = "granted";
         window.Notification.requestPermission = () => Promise.resolve("granted");
         
-        // Handle service worker registration for push
+        // Intercept ServiceWorker registration and notifications
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register = () => Promise.resolve({
-            showNotification: (title, options) => {
-               if (window.NotificationChannel) {
-                  window.NotificationChannel.postMessage(title + (options && options.body ? ": " + options.body : ""));
-               }
-            }
-          });
+          const originalRegister = navigator.serviceWorker.register;
+          navigator.serviceWorker.register = function() {
+            return originalRegister.apply(this, arguments).then(registration => {
+              const originalShowNotification = registration.showNotification;
+              registration.showNotification = function(title, options) {
+                sendToFlutter(title, options);
+                return Promise.resolve();
+              };
+              return registration;
+            });
+          };
         }
+
+        // Periodically check for specific UI elements that might indicate a status change
+        // if the site doesn't use standard Web Notifications API for everything
+        setInterval(() => {
+          const statusElement = document.querySelector('.jules-status-update'); // Example class
+          if (statusElement && !statusElement.dataset.notified) {
+            sendToFlutter("Jules Update", { body: statusElement.innerText });
+            statusElement.dataset.notified = "true";
+          }
+        }, 5000);
       })();
     ''');
   }
@@ -137,4 +217,65 @@ class WebViewerController extends GetxController {
 
   Future<bool> canGoBack() async => await webViewController.canGoBack();
   void goBack() => webViewController.goBack();
+
+  void openHistory() {
+    webViewController.runJavaScript('''
+      (function() {
+        // Try to find history/menu button by common attributes
+        const historySelectors = [
+          'button[aria-label*="History"]',
+          'button[aria-label*="menu"]',
+          'header button:first-child',
+          '.header button:first-child',
+          'button svg path[d*="M12 8v4l3 3"]' // Example path for clock/history icon
+        ];
+
+        for (const selector of historySelectors) {
+          const btn = document.querySelector(selector);
+          if (btn) {
+            btn.click();
+            return;
+          }
+        }
+
+        // Fallback to first button in header area
+        const header = document.querySelector('header, .header, [role="banner"]');
+        if (header) {
+          const firstBtn = header.querySelector('button, [role="button"]');
+          if (firstBtn) firstBtn.click();
+        }
+      })();
+    ''');
+  }
+
+  void closePanel() {
+    webViewController.runJavaScript('''
+      (function() {
+        const closeSelectors = [
+          'button[aria-label*="Close"]',
+          'button[aria-label*="close"]',
+          '.close-button',
+          'button svg path[d*="M18 6L6 18"]',
+          'button svg path[d*="M6 18L18 6"]'
+        ];
+
+        for (const selector of closeSelectors) {
+          const btn = document.querySelector(selector);
+          if (btn) {
+            btn.click();
+            return;
+          }
+        }
+
+        // Search by text content
+        const closeButtons = Array.from(document.querySelectorAll('button, [role="button"]')).filter(b =>
+          b.innerText.trim() === '✕' ||
+          b.innerText.toLowerCase().includes('close')
+        );
+        if (closeButtons.length > 0) {
+          closeButtons[0].click();
+        }
+      })();
+    ''');
+  }
 }

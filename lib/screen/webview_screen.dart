@@ -29,54 +29,60 @@ class WebViewerScreen extends StatelessWidget {
         extendBody: true,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Obx(() {
-          if (!controller.hasInternetConnection.value) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const JulesLogo(size: 120),
-                  const SizedBox(height: 40),
-                  Text('Could not load the page. Check your connection.',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: controller.retryConnection,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Try Again'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
           return Container(
             color: Theme.of(context).scaffoldBackgroundColor,
-            child: RefreshIndicator(
-              onRefresh: controller.retryConnection,
-              child: Stack(
-                children: [
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity == null) return;
+                // Only trigger if swipe is fast enough and not too far from top
+                if (details.primaryVelocity! > 800) {
+                  // Swipe Right (Left to Right)
+                  controller.openHistory();
+                } else if (details.primaryVelocity! < -800) {
+                  // Swipe Left (Right to Left)
+                  controller.closePanel();
+                }
+              },
+              child: RefreshIndicator(
+                onRefresh: controller.retryConnection,
+                child: Stack(
+                  children: [
                   Padding(
                     padding: EdgeInsets.only(
                       top: MediaQuery.of(context).padding.top,
                     ),
                     child: ClipRRect(
                       borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(24.0),
+                        top: Radius.circular(16.0),
                       ),
                       child: WebViewWidget(controller: controller.webViewController),
                     ),
                   ),
+                  if (!controller.hasInternetConnection.value)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.black54,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const JulesLogo(size: 80),
+                              const SizedBox(height: 20),
+                              const Text(
+                                'Connection lost. Trying to reconnect...',
+                                style: TextStyle(color: Colors.white, fontSize: 16),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: controller.retryConnection,
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   if (controller.loadingPercentage.value > 0 &&
                       controller.loadingPercentage.value < 100)
                     Positioned(
@@ -89,7 +95,8 @@ class WebViewerScreen extends StatelessWidget {
                         minHeight: 3,
                       ),
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
