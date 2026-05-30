@@ -33,7 +33,7 @@ class WebViewerController extends GetxController {
         channelDescription: 'Keep Jules AI active in the background',
         channelImportance: NotificationChannelImportance.LOW,
         priority: NotificationPriority.LOW,
-        iconData: const NotificationIconData(
+        iconData: NotificationIconData(
           resType: ResourceType.mipmap,
           resPrefix: ResourcePrefix.ic,
           name: 'launcher_icon',
@@ -43,7 +43,7 @@ class WebViewerController extends GetxController {
         showNotification: true,
         playSound: false,
       ),
-      foregroundTaskOptions: const ForegroundTaskOptions(
+      foregroundTaskOptions: ForegroundTaskOptions(
         interval: 5000,
         isOnceEvent: false,
         autoRunOnBoot: false,
